@@ -1,4 +1,4 @@
-html {
+html.bg-image {
     background-image: url(/static/paper.webp);
 
 }
@@ -6,4 +6,10 @@ html {
 /* I just HATE the :visited color for links */
 a,a:visited {
     color: blue;
+}
+
+.center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
