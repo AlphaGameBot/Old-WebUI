@@ -1,0 +1,9 @@
+html {
+    background-image: url(/static/paper.webp);
+
+}
+
+/* I just HATE the :visited color for links */
+a,a:visited {
+    color: blue;
+}

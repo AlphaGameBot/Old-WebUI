@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>Settings</h1>
+    
+    <form>
+        <label for="message_tracking">Message Counting Consent:</label>
+        <input type="checkbox" id="message_tracking" name="message_tracking" {% if message_tracking_consent %}checked{% endif %}> <br />
+        
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html>
