@@ -93,4 +93,4 @@ def user_settings_applied():
     return message("Settings applied successfully!  (You can go back to AlphaGameBot now)")
 # autorun prevention
 if __name__ == "__main__": 
-    app.run("0.0.0.0", 5000, debug=True) 
+    app.run("0.0.0.0", 5000) 
