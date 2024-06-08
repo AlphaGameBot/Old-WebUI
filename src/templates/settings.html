@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Settings &bull; AlphaGameBot</title>
-    <link rel="stylesheet" type="text/css" href="/static/global.css">
-    <link rel="stylesheet" type="text/css" href="/static/pico.min.css">
-    <script src="/static/htmx.min.js"></script>
-</head>
-<body class="center">
-    <h1>AlphaGameBot Settings</h1>
-    
-    <form hx-post="/user/settings/apply?token={{token}}" id="settingsForm">
-        <label for="message_tracking">Message Counting Consent:</label>
-        <input type="checkbox" id="message_tracking" name="message_tracking" {% if message_tracking_consent %}checked{% endif %}>
-        <input type="hidden" name="message_tracking" value="off"> <!-- Hidden input field for when checkbox is unchecked -->
-        <br>
-        
-        <input type="submit" value="Save">
-    </form>
+    <head>
+        <title>Settings &bull; AlphaGameBot</title>
+        <link rel="stylesheet" type="text/css" href="/static/global.css">
+        <link rel="stylesheet" type="text/css" href="/static/pico.min.css">
+        <script src="/static/htmx.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body class="center">
+        <h1>AlphaGameBot Settings</h1>
+        <hr />
+        <form hx-post="/user/settings/apply?token={{token}}" id="settingsForm">
+            <label for="message_tracking">Message Counting Consent:
+                <input type="checkbox" id="message_tracking" name="message_tracking" {% if message_tracking_consent %}checked{% endif %}>
+            </label>
+            <input type="hidden" name="message_tracking" value="off"> <!-- Hidden input field for when checkbox is unchecked -->
+            <br>
+            
+            <input type="submit" value="Save">
+        </form>
 
-    <script>
-        // Add event listener to checkbox
-        document.getElementById("message_tracking").addEventListener("change", function() {
-            // Check if checkbox is checked
-            if (this.checked) {
-                // Remove the hidden input field if checkbox is checked
-                document.getElementById("settingsForm").removeChild(document.querySelector('input[type="hidden"][name="message_tracking"]'));
-            } else {
-                // Add hidden input field if checkbox is unchecked
-                var hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.name = "message_tracking";
-                hiddenInput.value = "off";
-                document.getElementById("settingsForm").appendChild(hiddenInput);
-            }
-        });
-    </script>
-</body>
+        <script>
+            // Add event listener to checkbox
+            document.getElementById("message_tracking").addEventListener("change", function() {
+                // Check if checkbox is checked
+                if (this.checked) {
+                    // Remove the hidden input field if checkbox is checked
+                    document.getElementById("settingsForm").removeChild(document.querySelector('input[type="hidden"][name="message_tracking"]'));
+                } else {
+                    // Add hidden input field if checkbox is unchecked
+                    var hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "message_tracking";
+                    hiddenInput.value = "off";
+                    document.getElementById("settingsForm").appendChild(hiddenInput);
+                }
+            });
+        </script>
+    </body>
 </html>
