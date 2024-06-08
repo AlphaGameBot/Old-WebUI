@@ -1,4 +1,12 @@
-from flask import Flask, request, render_template, send_from_directory, Response, redirect
+from flask import (
+    Flask, 
+    request, 
+    render_template, 
+    send_from_directory, 
+    Response, 
+    redirect,
+)
+from werkzeug.exceptions import HTTPException
 import mysql.connector
 import os
 import time
@@ -16,28 +24,17 @@ cnx = mysql.connector.connect(
 )
 
 
-def message(message, type="INFO"):
-    return render_template('messagebox.html', type=type, message=message)
+def message(title, message, fulltitle=True):
+    return render_template('information.html', title=title, content=message, fulltitle=fulltitle)
 
-@app.route('/')
-def index():
-    return 'Sorry, no root here.'
 
-@app.errorhandler(500)
-def internal_error(error):
-    return message("Internal Server Error", "ERROR"), 500
-
-@app.errorhandler(404)
-def not_found(error):
-    return message("Page not found", "ERROR"), 404
-
-@app.route('/static/<path:path>')
-def send_static(path):
-    return send_from_directory('static', path)
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    return message(f"Error #{e.code}", e), e.code
 
 def validateToken(token):
     if token == None:
-        return False, -1
+        return False, -1, None
     cnx.commit() # get latest and gratest data
     
     c = cnx.cursor()
@@ -57,13 +54,13 @@ def user_settings():
     token_valid, code, tokenResponse = validateToken(token)
     if not token_valid:
         if code == 1:
-            return message("Token Invalid", "ERROR")
+            return message("Authentication Error", "Token is invalid or does not exist. Please try again.")
         elif code == 2:
-            return message("Token Expired", "ERROR")
+            return message("Authentication Error", "This token is expired.  Please create a new one in AlphaGameBot with /user settings.")
         elif code == -1:
-            return message("No token provided", "ERROR")
+            return message("Authentication Error", "No token provided. Please provide a token.")
         else:
-            return message("Token Authentication Error", "ERROR")
+            return message("Authentication Error", "You cannot be authenticated. Please try again.")
     c = cnx.cursor()
     c.execute("SELECT message_tracking_consent FROM user_settings WHERE userid = %s", [tokenResponse[0]])
     usersettings = c.fetchone()
@@ -90,7 +87,9 @@ def user_settings_apply():
 
 @app.route("/user/settings/applied")
 def user_settings_applied():
-    return message("Settings applied successfully!  (You can go back to AlphaGameBot now)")
+    return message("Success", 
+                   "Settings applied successfully!  (You can go back to AlphaGameBot now)", 
+                   fulltitle=False)
 # autorun prevention
 if __name__ == "__main__": 
     app.run("0.0.0.0", 5000, debug=True) 
