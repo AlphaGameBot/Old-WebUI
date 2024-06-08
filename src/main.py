@@ -87,9 +87,8 @@ def user_settings_apply():
 
 @app.route("/user/settings/applied")
 def user_settings_applied():
-    return message("Success", 
-                   "Settings applied successfully!  (You can go back to AlphaGameBot now)", 
-                   fulltitle=False)
+    return "<h2>Settings Applied.</h2><p>Your settings have been saved.  You can now go back to AlphaGameBot.</p>"
+  
 # autorun prevention
 if __name__ == "__main__": 
-    app.run("0.0.0.0", 5000, debug=True) 
+    app.run("0.0.0.0", 5000) 
