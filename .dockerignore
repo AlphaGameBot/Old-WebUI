@@ -1,0 +1,7 @@
+Jenkinsfile
+Dockerfile
+LICENSE
+.env
+.venv
+*/__pycache__
+__pycache__
