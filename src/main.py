@@ -11,6 +11,7 @@ import mysql.connector
 import os
 import time
 import utility
+import json
 from dotenv import load_dotenv
 
 load_dotenv() # Load environment variables from .env file
@@ -88,7 +89,29 @@ def user_settings_apply():
 @app.route("/user/settings/applied")
 def user_settings_applied():
     return "<h2>Settings Applied.</h2><p>Your settings have been saved.  You can now go back to AlphaGameBot.</p>"
-  
+
+@app.route("/healthcheck")
+def healthcheck():
+    with open("webui.json", "r") as f:
+        v = json.load(f)["VERSION"]
+    m = {
+        "message": "All systems operational.",
+        "status": "ok",
+        "notes": [],
+        "version": v,
+        "code": 200
+    }
+    try:
+        c = cnx.cursor()
+        c.execute("SELECT 1")
+    except:
+        m["message"] = "Database connection failed."
+        m["status"] = "error"
+        m["notes"].append("Database connection failed.")
+        m["code"] = 500
+
+    return m, m["code"]
+
 # autorun prevention
 if __name__ == "__main__": 
     app.run("0.0.0.0", 5000) 
