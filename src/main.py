@@ -36,6 +36,7 @@ def handle_exception(e):
 def validateToken(token):
     if token == None:
         return False, -1, None
+    cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     cnx.commit() # get latest and gratest data
     
     c = cnx.cursor()
@@ -49,8 +50,9 @@ def validateToken(token):
     else:
         return True, 0, r
     
-@app.route("/user/settings")
+@app.route("/webui/user/settings")
 def user_settings():
+    cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     token = request.args.get("token")
     token_valid, code, tokenResponse = validateToken(token)
     if not token_valid:
@@ -75,8 +77,9 @@ def checkboxValueToBoolean(value):
     else:
         raise ValueError("Invalid value for checkbox, expected 'on' or 'off' but got " + value)
     
-@app.route("/user/settings/apply", methods=["POST"])
+@app.route("/webui/user/settings/apply", methods=["POST"])
 def user_settings_apply():
+    cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     token = request.args.get("token")
     token_valid, code, tokenResponse = validateToken(token)
     if not token_valid:
@@ -86,7 +89,7 @@ def user_settings_apply():
     cnx.commit()
     return redirect("/user/settings/applied", code=302)
 
-@app.route("/user/settings/applied")
+@app.route("/webui/user/settings/applied")
 def user_settings_applied():
     return "<h2>Settings Applied.</h2><p>Your settings have been saved.  You can now go back to AlphaGameBot.</p>"
 
