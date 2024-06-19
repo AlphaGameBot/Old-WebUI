@@ -2,15 +2,15 @@
 <html>
     <head>
         <title>Settings &bull; AlphaGameBot</title>
-        <link rel="stylesheet" type="text/css" href="/static/global.css">
-        <link rel="stylesheet" type="text/css" href="/static/pico.min.css">
-        <script src="/static/htmx.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/webui/static/global.css">
+        <link rel="stylesheet" type="text/css" href="/webui/static/pico.min.css">
+        <script src="/webui/static/htmx.min.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body class="center">
         <h1>AlphaGameBot Settings</h1>
         <hr />
-        <form hx-post="/user/settings/apply?token={{token}}" id="settingsForm">
+        <form hx-post="/webui/user/settings/apply?token={{token}}" id="settingsForm">
             <label for="message_tracking">Message Counting Consent:
                 <input type="checkbox" id="message_tracking" name="message_tracking" {% if message_tracking_consent %}checked{% endif %}>
             </label>

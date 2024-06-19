@@ -28,6 +28,10 @@ cnx = mysql.connector.connect(
 def message(title, message, fulltitle=True):
     return render_template('information.html', title=title, content=message, fulltitle=fulltitle)
 
+# SERVE STATIC FILES
+@app.route("/webui/static/<path:path>")
+def _static(path: str):
+    return send_from_directory("static", path)
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):
@@ -49,7 +53,11 @@ def validateToken(token):
         return False, 2, r
     else:
         return True, 0, r
-    
+
+@app.route("/webui")
+def index():
+    return message("AlphaGameBot WebUI", "Welcome to the AlphaGameBot WebUI.  Unfortunately, there is no real 'index'...  Please use a command like /user settings in AlphaGameBot to get a link to interact with it.")
+
 @app.route("/webui/user/settings")
 def user_settings():
     cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
@@ -87,7 +95,7 @@ def user_settings_apply():
     c = cnx.cursor()
     c.execute("UPDATE user_settings SET message_tracking_consent = %s WHERE userid = %s", [checkboxValueToBoolean(request.form["message_tracking"]), tokenResponse[0]])
     cnx.commit()
-    return redirect("/user/settings/applied", code=302)
+    return redirect("/webui/user/settings/applied", code=302)
 
 @app.route("/webui/user/settings/applied")
 def user_settings_applied():
@@ -95,6 +103,7 @@ def user_settings_applied():
 
 @app.route("/healthcheck")
 def healthcheck():
+    cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     with open("webui.json", "r") as f:
         v = json.load(f)["VERSION"]
     m = {
