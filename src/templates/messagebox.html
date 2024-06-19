@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Information &bull; AlphaGameBot Web UI</title>
-        <link rel="stylesheet" type="text/css" href="/static/global.css" />
+        <link rel="stylesheet" type="text/css" href="/webui/static/global.css" />
         <style>
             #informationBox {
                 --side: 30%;
@@ -65,11 +65,11 @@
         <div id="informationBox">
             <h2>
                 {% if type =="INFO" %}
-                <img width="20" src="/static/information.jpg" /> Information
+                <img width="20" src="/webui/static/information.jpg" /> Information
                 {% elif type == "WARN" %}
-                <img width="20" src="/static/warning.png" /> Warning
+                <img width="20" src="/webui/static/warning.png" /> Warning
                 {% elif type == "ERROR" %}
-                <img width="20" src="/static/error.png" /> Error 
+                <img width="20" src="/webui/static/error.png" /> Error 
                 {% else %}
                 Message
                 {% endif %}
