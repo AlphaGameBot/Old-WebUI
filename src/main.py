@@ -33,11 +33,14 @@ def message(title, message, fulltitle=True):
 def _static(path: str):
     return send_from_directory("static", path)
 
+@app.route("/favicon.ico")
+def _favicon():
+    return redirect("https://static.alphagame.dev/alphagamebot/img/icon.png")
 @app.errorhandler(HTTPException)
 def handle_exception(e):
     return message(f"Error #{e.code}", e), e.code
 
-def validateToken(token):
+def validateToken(token, tokenType):
     if token == None:
         return False, -1, None
     cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
@@ -45,16 +48,19 @@ def validateToken(token):
     
     c = cnx.cursor()
     # check if token is valid
-    c.execute("SELECT * FROM webui_tokens WHERE token = %s", (request.args.get("token"),))
+    c.execute("SELECT * FROM webui_tokens WHERE token = %s;", (request.args.get("token"),))
     r = c.fetchone()
+    token_for = (r[4] if r != None else None)
     if r == None:
         return False, 1, r
-    elif r[2] > time.time():
+    elif r[3] > time.time():
         return False, 2, r
     else:
+        if token_for != tokenType:
+            return False, 3, r
         return True, 0, r
 
-@app.route("/webui")
+@app.route("/webui/")
 def index():
     return message("AlphaGameBot WebUI", "Welcome to the AlphaGameBot WebUI.  Unfortunately, there is no real 'index'...  Please use a command like /user settings in AlphaGameBot to get a link to interact with it.")
 
@@ -62,12 +68,14 @@ def index():
 def user_settings():
     cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     token = request.args.get("token")
-    token_valid, code, tokenResponse = validateToken(token)
+    token_valid, code, tokenResponse = validateToken(token, "USER_SETTINGS")
     if not token_valid:
         if code == 1:
             return message("Authentication Error", "Token is invalid or does not exist. Please try again.")
         elif code == 2:
             return message("Authentication Error", "This token is expired.  Please create a new one in AlphaGameBot with /user settings.")
+        elif code == 3:
+            return message("Authentication Error", "This token is of an invalid type.  Please create another token in AlphaGameBot.")
         elif code == -1:
             return message("Authentication Error", "No token provided. Please provide a token.")
         else:
@@ -77,6 +85,27 @@ def user_settings():
     usersettings = c.fetchone()
     return render_template("settings.html", token=token, message_tracking_consent=usersettings[0])
 
+@app.route("/webui/guild/settings")
+def guild_settings():
+    cnx.reconnect()
+    token = request.args.get("token")
+    token_valid, code, tokenResponse = validateToken(token, "GUILD_SETTINGS")
+    if not token_valid:
+        if code == 1:
+            return message("Authentication Error", "Token is invalid or does not exist. Please try again.")
+        elif code == 2:
+            return message("Authentication Error", "This token is expired.  Please create a new one in AlphaGameBot with /guild settings.")
+        elif code == 3:
+            return message("Authentication Error", "This token is of an invalid type.  Please create another token in AlphaGameBot.")
+        elif code == -1:
+            return message("Authentication Error", "No token provided. Please provide a token.")
+        else:
+            return message("Authentication Error", "You cannot be authenticated. Please try again.")
+    c = cnx.cursor()
+    c.execute("SELECT leveling_enabled FROM guild_settings WHERE guildid = %s", [tokenResponse[1]])
+    usersettings = c.fetchone()
+    return render_template("guild_settings.html", token=token, leveling=usersettings[0])
+    
 def checkboxValueToBoolean(value):
     if value == "on" or value == 1:
         return 1
@@ -85,13 +114,27 @@ def checkboxValueToBoolean(value):
     else:
         raise ValueError("Invalid value for checkbox, expected 'on' or 'off' but got " + value)
     
+@app.route("/webui/guild/settings/apply", methods=["POST"])
+def guild_settings_apply():
+    cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
+    token = request.args.get("token")
+    token_valid, code, tokenResponse = validateToken(token, "GUILD_SETTINGS")
+    if not token_valid:
+        return {"error": "Invalid token", "code": code}, 403
+    c = cnx.cursor()
+    c.execute("UPDATE guild_settings SET leveling_enabled = %s WHERE guildid = %s", [checkboxValueToBoolean(request.form["leveling"]), tokenResponse[1]])
+    cnx.commit()
+    if not c.rowcount > 0:
+        return "<h2>Success</h2><p>No changes were made.</p>"
+    return redirect("/webui/guild/settings/applied", code=302)
+
 @app.route("/webui/user/settings/apply", methods=["POST"])
 def user_settings_apply():
     cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     token = request.args.get("token")
-    token_valid, code, tokenResponse = validateToken(token)
+    token_valid, code, tokenResponse = validateToken(token, "USER_SETTINGS")
     if not token_valid:
-        return {"error": "Invalid token", "code": code}, 400
+        return {"error": "Invalid token", "code": code}, 403
     c = cnx.cursor()
     c.execute("UPDATE user_settings SET message_tracking_consent = %s WHERE userid = %s", [checkboxValueToBoolean(request.form["message_tracking"]), tokenResponse[0]])
     cnx.commit()
@@ -101,7 +144,12 @@ def user_settings_apply():
 def user_settings_applied():
     return "<h2>Settings Applied.</h2><p>Your settings have been saved.  You can now go back to AlphaGameBot.</p>"
 
+@app.route("/webui/guild/settings/applied")
+def guild_settings_applied():
+    return "<h2>Settings Applied.</h2>"
+    
 @app.route("/healthcheck")
+@app.route("/webui/healthcheck")
 def healthcheck():
     cnx.reconnect() # fix a stupid bug where it disconnects.  Bandaid fix, but oh-well...
     with open("webui.json", "r") as f:
