@@ -1,11 +1,13 @@
+<!-- Template: information.html; Path src/templates/information.html -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Information &bull; AlphaGameBot Web UI</title>
+        <title>{{title}} &bull; AlphaGameBot Web UI</title>
         <link rel="stylesheet" type="text/css" href="/webui/static/pico.min.css" />
         <link rel="stylesheet" type="text/css" href="/webui/static/global.css" />
+        <link rel="stylesheet" type="text/css" href="/webui/static/information.css" />
     </head>
     <body class="center">
         {% if fulltitle %}
@@ -13,8 +15,23 @@
         {% else %}
         <h2>{{title}}</h2>
         {% endif %}
-        <p>{{content}}</p>
-        <footer>AlphaGameBot Web UI &copy; Damien Boisvert (AlphaGameDeveloper) 2024.</footer>
-
+        <div id="information_content">
+        	{% for line in content %}
+        	{% if line == "" %}
+        	<!-- empty line -->
+        	<p>&nbsp;</p>
+        	{% else %}
+        	<p>{{line}}</p>
+        	{% endif %}
+        	{% endfor %}
+		</div>
     </body>
+    <footer>
+    	<p>AlphaGameBot Web UI &copy; Damien Boisvert (AlphaGameDeveloper) 2024.</p>
+    	<p>GitHub: 
+    		<a href="https://github.com/AlphaGameBot/AlphaGameBot">AlphaGameBot</a>
+    		and the
+    		<a href="https://github.com/AlphaGameBot/WebUI">WebUI</a>
+    </footer>
+
 </html>

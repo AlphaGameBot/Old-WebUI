@@ -13,7 +13,7 @@ import time
 import utility
 import json
 from dotenv import load_dotenv
-
+import disc
 load_dotenv() # Load environment variables from .env file
 app = Flask(__name__)
 
@@ -26,7 +26,10 @@ cnx = mysql.connector.connect(
 
 
 def message(title, message, fulltitle=True):
-    return render_template('information.html', title=title, content=message, fulltitle=fulltitle)
+    return render_template('information.html',
+    title=title,
+    content=[line.strip("\n") for line in message.split("\n")], 
+    fulltitle=fulltitle)
 
 # SERVE STATIC FILES
 @app.route("/webui/static/<path:path>")
@@ -62,7 +65,7 @@ def validateToken(token, tokenType):
 
 @app.route("/webui/")
 def index():
-    return message("AlphaGameBot WebUI", "Welcome to the AlphaGameBot WebUI.  Unfortunately, there is no real 'index'...  Please use a command like /user settings in AlphaGameBot to get a link to interact with it.")
+    return message("AlphaGameBot WebUI", "Welcome to the AlphaGameBot WebUI.\nUnfortunately, there is no real 'index'...  Please use a command like /user settings in AlphaGameBot to get a link to interact with it.")
 
 @app.route("/webui/user/settings")
 def user_settings():
@@ -148,6 +151,51 @@ def user_settings_applied():
 def guild_settings_applied():
     return "<h2>Settings Applied.</h2>"
     
+@app.route("/webui/user/stats/<int:userid>")
+def user_page_global(userid: int):
+    cnx.reconnect()
+    c = cnx.cursor()
+    
+    c.execute("SELECT messages_sent, commands_ran FROM user_stats WHERE userid = %s", [userid])
+
+    try:
+        messages, commands = c.fetchone()
+    except TypeError:
+        return message("Error", 
+        "This user is not recognized.\n"
+        "Remember that AlphaGameBot needs to be able to see this user (i.e, being in at least one server with them),"
+        " and that they need to have sent at least one message.\n\n"
+        "If you believe that this is an error, please make a GitHub issue."), 404
+
+
+    i = disc.ShittyDiscordHandler(os.getenv("TOKEN"))
+
+    pfp, d = i.getAvatarFromUser(userid, size=64, rc=True)    
+    print(pfp)
+
+    return render_template("user_stats.html", messages_sent=messages, username=d['username'], commands_ran=commands, pfp=pfp, guild=True, userid=userid)
+         
+
+
+        
+@app.route("/webui/user/stats/<int:userid>/<int:guildid>")
+def user_page_guild(userid: int, guildid: int):
+    cnx.reconnect()
+    c = cnx.cursor()
+        
+    c.execute("SELECT messages_sent, commands_ran, user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", (userid, guildid))
+    
+    try:
+        messages, commands, level = c.fetchone()
+    except TypeError:
+        return message("Error", "This user and/or guild is not recognized."), 404
+
+    i = disc.ShittyDiscordHandler(os.getenv("TOKEN"))
+
+    pfp, d = i.getAvatarFromUser(userid, size=64, rc=True)    
+    print(pfp)
+    return render_template("user_stats.html", messages_sent=messages, username=d['username'], commands_ran=commands, level=level, pfp=pfp, guild=True, userid=userid)
+         
 @app.route("/healthcheck")
 @app.route("/webui/healthcheck")
 def healthcheck():

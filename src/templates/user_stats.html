@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User Stats &bull; AlphaGameBot</title>
+        <link rel="stylesheet" type="text/css" href="/webui/static/global.css">
+        <link rel="stylesheet" type="text/css" href="/webui/static/pico.min.css">
+        <script src="/webui/static/htmx.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body class="center">
+    	<h1>User Stats for 
+    		<span class="tooltip"><i>{{username}}</i>
+    			<span>ID: {{userid}}</span>
+    		</span>
+    		<img src="{{pfp}}" />
+    	</h1>
+    	<hr />
+    	<p>Messages Sent: <b>{{messages_sent}}</b></p>
+    	<p>Commands Ran: <b>{{commands_ran}}</b></p>
+		{% if guild %}
+			<!-- GUILD -->
+			<p>Guild</p>
+			<p>Guild Level: <b>{{level}}</b></p>
+			<!-- END GUILD -->
+		{% endif %}			
+    </body>
+</html>
