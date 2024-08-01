@@ -13,3 +13,14 @@ a,a:visited {
     margin-left: auto;
     margin-right: auto;
 }
+
+.tooltip span {
+	display: none;
+	background-color: yellow;
+	border: 1px dashed #000000;
+	cursor: pointer;
+}
+
+.tooltip:hover span {
+	display: inline;
+}
