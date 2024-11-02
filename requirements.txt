@@ -3,3 +3,4 @@ mysql-connector-python
 python-dotenv
 requests
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+werkzeug>=3.0.6 # not directly required, pinned by Snyk to avoid a vulnerability
